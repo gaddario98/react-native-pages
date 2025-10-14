@@ -1,11 +1,11 @@
 import { setPageConfig, PageConfigProps } from "@gaddario98/react-pages";
 import Element from "./components/Element";
-import { Dimensions, View } from "react-native";
+import { View } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Alert, contentLayout, padding } from "@gaddario98/react-native-ui";
 import { DefaultView } from "./components/layout";
+import React from "react";
 
-const { width: screenWidth, height } = Dimensions.get('window');
 export const setReactNativePageConfig = (config: Partial<PageConfigProps>) => {
   setPageConfig({
     FooterContainer: ({ children, withoutPadding, ...props }) => (
@@ -71,7 +71,7 @@ export const setReactNativePageConfig = (config: Partial<PageConfigProps>) => {
     PageContainer: ({ children, id }) => (
       <SafeAreaView style={{ flex: 1 }} id={id} key={id}>
         
-        {children}
+        {children as React.JSX.Element}
       </SafeAreaView>
     ),
     ...config,

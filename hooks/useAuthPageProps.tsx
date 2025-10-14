@@ -10,7 +10,7 @@ export interface UseAuthPageProps {
   reportProblem?: React.ComponentProps<typeof Button>;
 }
 
-export const useAuthPageProps = (props: UseAuthPageProps) => {
+export const useAuthPageProps = (props: UseAuthPageProps): PageProps => {
 
   const authPageProps = useMemo(
     (): PageProps => ({
