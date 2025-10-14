@@ -1,562 +1,135 @@
 # @gaddario98/react-native-pages
 
-[![npm version](https://badge.fury.io/js/@gaddario98%2Freact-native-pages.svg)](https://badge.fury.io/js/@gaddario98%2Freact-native-pages)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+React Native primitives on top of [`@gaddario98/react-pages`](../react-base-pages/README.md) that let you compose data-driven screens with the same declarative page builder API used on web. This package wires the shared page engine to native-safe layout containers, virtualization powered by FlashList, and helpers tailored for Expo/React Native apps.
 
-A powerful React Native library for dynamic page generation with form management, query handling, and flexible layouts. Built on top of `@gaddario98/react-pages`, this library provides React Native-specific implementations for building complex, data-driven mobile applications.
+## Highlights
 
-## Features
-
-✨ **Dynamic Page Generation** - Create pages dynamically based on configuration objects  
-📱 **React Native Optimized** - Native components and gestures for optimal mobile experience  
-🔄 **Drag & Drop Support** - Built-in draggable list functionality with `react-native-draggable-flatlist`  
-🎨 **Flexible Layouts** - Multiple view types including default scroll views and Shopify-style layouts  
-🔍 **Query Integration** - Seamless integration with `@tanstack/react-query` for data fetching  
-📝 **Form Management** - Advanced form handling with `react-hook-form` integration  
-🌐 **i18n Support** - Full internationalization support with `react-i18next`  
-🎯 **Type Safety** - Built with TypeScript for better development experience  
-🔐 **Authentication Ready** - Built-in authentication page templates and controls
+- Built-in React Native wrappers for all page containers (safe area, spacing, loader, header, footer)
+- Virtualized body layouts via Shopify FlashList with optional masonry and infinite scroll
+- Draggable body layout backed by `react-native-draggable-flatlist`
+- Ready-made authentication page helper that reuses your shared UI kit
+- Re-exports the complete `@gaddario98/react-pages` surface (types, hooks, utilities) for end-to-end parity
+- Designed to be configured once through `setReactNativePageConfig` (or `setReactNativeConfig` from `@gaddario98/react-native-core`)
 
 ## Installation
 
 ```bash
-npm install @gaddario98/react-native-pages
+# with npm	npm install @gaddario98/react-native-pages
+# or with yarn	yarn add @gaddario98/react-native-pages
 ```
 
-### Peer Dependencies
+### Peer dependencies
 
-Make sure to install the required peer dependencies:
+Make sure the following packages are available in your project (matching the versions declared in `package.json`):
 
-```bash
-npm install @gaddario98/react-form @gaddario98/react-native-ui @gaddario98/react-pages @gaddario98/react-queries @gaddario98/utiles react react-dom react-native @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities @shopify/flash-list @tanstack/react-query @tanstack/react-virtual i18next react-hook-form react-i18next react-native-draggable-flatlist react-native-gesture-handler
+```
+react, react-native, react-dom, react-hook-form, @tanstack/react-query,
+@shopify/flash-list, react-native-draggable-flatlist, react-native-gesture-handler,
+@gaddario98/react-pages, @gaddario98/react-native-ui, @gaddario98/react-form,
+@gaddario98/react-queries, @gaddario98/utiles, i18next, react-i18next
 ```
 
-## Quick Start
+## Quick start
 
-### 1. Configure the Library
-
-First, configure the React Native page settings in your app's entry point:
+1. **Configure the React Native containers** – call `setReactNativePageConfig` as early as possible (for example when bootstrapping providers). The helper supplies sensible defaults (safe area wrapper, padding, loader banner), and you can override any part of the shared `pageConfig`.
 
 ```tsx
 import { setReactNativePageConfig } from '@gaddario98/react-native-pages';
 
-// Configure the library with your preferred settings
 setReactNativePageConfig({
-  // Custom configuration options
-  authPageImage: require('./assets/logo.png'),
-  // Add other configuration as needed
+	authPageImage: require('./assets/login.png'),
+	HeaderContainer: ({ children }) => children,
+	FooterContainer: ({ children }) => children,
+	// Provide a custom SafeAreaView / ScrollView if you need it
+	BodyContainer: ({ children, ...rest }) => (
+		<ShopifyView {...rest} body={children} itemForPage={20} />
+	),
 });
 ```
 
-### 2. Create Your First Page
+2. **Render a page with the shared generator** – all exports from `@gaddario98/react-pages` are forwarded, so you can use `PageGenerator`, `PageProps`, `usePageConfig`, and the rest exactly as on web.
 
 ```tsx
-import React from 'react';
-import { PageGenerator } from '@gaddario98/react-native-pages';
+import { PageGenerator, PageProps } from '@gaddario98/react-native-pages';
 
-const MyPage = () => {
-  return (
-    <PageGenerator
-      id="my-page"
-      ns="common" // Translation namespace
-      contents={[
-        {
-          type: 'text',
-          config: {
-            text: 'Welcome to my app!',
-            style: { fontSize: 24, fontWeight: 'bold' }
-          }
-        },
-        {
-          type: 'button',
-          config: {
-            title: 'Get Started',
-            onPress: () => console.log('Button pressed!')
-          }
-        }
-      ]}
-    />
-  );
-};
+const Example = () => {
+	const props: PageProps = {
+		id: 'home',
+		ns: 'home',
+		contents: [
+			{
+				type: 'custom',
+				component: <Headline text="Welcome" />, // your RN component
+			},
+		],
+	};
 
-export default MyPage;
-```
-
-## Core Components
-
-### PageGenerator
-
-The main component for generating dynamic pages.
-
-```tsx
-import { PageGenerator } from '@gaddario98/react-native-pages';
-
-<PageGenerator
-  id="unique-page-id"
-  ns="translation-namespace"
-  contents={[...]} // Page content configuration
-  queries={[...]}  // Data queries configuration
-  form={{...}}     // Form configuration
-  viewSettings={{...}} // Layout and behavior settings
-  meta={{...}}     // Page metadata
-/>
-```
-
-### Layout Components
-
-#### DefaultView
-
-A scrollable view with pull-to-refresh functionality:
-
-```tsx
-import { DefaultView } from '@gaddario98/react-native-pages';
-
-<DefaultView
-  viewSettings={{ disableRefreshing: false }}
-  handleRefresh={async () => {
-    // Handle refresh logic
-  }}
-  hasQueries={true}
->
-  {/* Your content */}
-</DefaultView>
-```
-
-#### DraggableView
-
-A draggable list view for reorderable content:
-
-```tsx
-import { DraggableView } from '@gaddario98/react-native-pages';
-
-<DraggableView
-  body={items}
-  onReorder={(data) => {
-    // Handle item reordering
-    console.log('New order:', data);
-  }}
-  numColumns={1}
-  itemForPage={10}
-/>
-```
-
-#### ShopifyView
-
-Optimized view using Shopify's FlashList for performance:
-
-```tsx
-import { ShopifyView } from '@gaddario98/react-native-pages';
-
-<ShopifyView
-  data={largeDataSet}
-  renderItem={({ item }) => <YourItemComponent item={item} />}
-  estimatedItemSize={50}
-/>
-```
-
-## Advanced Usage
-
-### Form Integration
-
-Create forms with validation and submission handling:
-
-```tsx
-import { PageGenerator } from '@gaddario98/react-native-pages';
-import { useForm } from 'react-hook-form';
-
-const FormPage = () => {
-  return (
-    <PageGenerator
-      id="form-page"
-      ns="forms"
-      form={{
-        defaultValues: {
-          name: '',
-          email: '',
-        },
-        validation: {
-          name: { required: 'Name is required' },
-          email: { 
-            required: 'Email is required',
-            pattern: {
-              value: /^\S+@\S+$/i,
-              message: 'Invalid email format'
-            }
-          }
-        }
-      }}
-      contents={[
-        {
-          type: 'input',
-          name: 'name',
-          config: {
-            placeholder: 'Enter your name',
-            label: 'Name'
-          }
-        },
-        {
-          type: 'input',
-          name: 'email',
-          config: {
-            placeholder: 'Enter your email',
-            label: 'Email',
-            keyboardType: 'email-address'
-          }
-        },
-        {
-          type: 'submit',
-          config: {
-            title: 'Submit',
-            onSubmit: (data) => {
-              console.log('Form submitted:', data);
-            }
-          }
-        }
-      ]}
-    />
-  );
+	return <PageGenerator {...props} />;
 };
 ```
 
-### Query Integration
+## Layout building blocks
 
-Integrate with data fetching using React Query:
+- `DefaultView` – ScrollView with shared spacing (`pageLayout`, `padding`), safe refresh control when queries are present, and support for pull-to-refresh toggled via `viewSettings.disableRefreshing`.
+- `ShopifyView` – FlashList-backed virtualizer that accepts the same `viewSettings` from `@gaddario98/react-pages`. Supports `itemForPage`, `onEndReached`, `numColumns`, and Masonry layout (`type: 'mansoryLayout'`).
+- `DraggableView` – DraggableFlatList integration with long-press drag handles. Honors `isInDraggableView` / `isDraggable` flags from content items and forwards reorder events via `onReorder`.
 
-```tsx
-import { PageGenerator } from '@gaddario98/react-native-pages';
+Each layout shares the same props signature as `pageConfig.BodyContainer`, so you can drop them in via `viewSettings.customLayoutComponent` or override the global config.
 
-const DataPage = () => {
-  return (
-    <PageGenerator
-      id="data-page"
-      ns="data"
-      queries={[
-        {
-          queryKey: ['users'],
-          queryFn: () => fetch('/api/users').then(res => res.json()),
-          enabled: true
-        }
-      ]}
-      contents={[
-        {
-          type: 'list',
-          config: {
-            dataSource: 'users', // References the query above
-            renderItem: ({ item }) => (
-              <UserCard user={item} />
-            )
-          }
-        }
-      ]}
-    />
-  );
-};
-```
+## Auth page helper
 
-### Authentication Pages
-
-Use the built-in authentication page generator:
+`useAuthPageProps` builds a complete authentication flow using your UI kit components (`Image`, `Paragraph`, `Button`). It merges the global `pageConfig.authPageImage` fallback with the overrides you provide and delivers a ready-to-render `PageProps` object for login/signup/report-problem screens.
 
 ```tsx
 import { useAuthPageProps } from '@gaddario98/react-native-pages';
 
-const AuthPage = () => {
-  const authProps = useAuthPageProps({
-    image: {
-      source: require('./assets/logo.png'),
-      style: { width: 200, height: 200 }
-    },
-    login: {
-      title: 'Sign In',
-      onPress: () => {
-        // Handle login
-      }
-    },
-    signup: {
-      title: 'Create Account',
-      onPress: () => {
-        // Handle signup
-      }
-    }
-  });
-
-  return <PageGenerator {...authProps} />;
-};
-```
-
-## Configuration Options
-
-### setReactNativePageConfig
-
-Configure global settings for the library:
-
-```tsx
-import { setReactNativePageConfig } from '@gaddario98/react-native-pages';
-
-setReactNativePageConfig({
-  // Custom page container
-  PageContainer: ({ children, id }) => (
-    <SafeAreaView style={{ flex: 1 }} id={id}>
-      {children}
-    </SafeAreaView>
-  ),
-  
-  // Custom header container
-  HeaderContainer: ({ children, withoutPadding }) => (
-    <View style={{ 
-      paddingHorizontal: withoutPadding ? 0 : 16,
-      paddingTop: withoutPadding ? 0 : 16 
-    }}>
-      {children}
-    </View>
-  ),
-  
-  // Custom footer container
-  FooterContainer: ({ children, withoutPadding }) => (
-    <View style={{ 
-      paddingHorizontal: withoutPadding ? 0 : 16,
-      paddingBottom: withoutPadding ? 0 : 16 
-    }}>
-      {children}
-    </View>
-  ),
-  
-  // Custom body container
-  BodyContainer: ({ children }) => (
-    <DefaultView>{children}</DefaultView>
-  ),
-  
-  // Custom loader component
-  LoaderComponent: ({ loading, message, ns }) => (
-    loading ? <ActivityIndicator size="large" /> : null
-  ),
-  
-  // Authentication page image
-  authPageImage: require('./assets/auth-bg.png'),
-  
-  // Check if user is logged in
-  isLogged: (user) => !!user?.id,
-});
-```
-
-## Layout Types
-
-### ViewSettings Configuration
-
-Control the layout and behavior of your pages:
-
-```tsx
-const viewSettings = {
-  // Disable pull-to-refresh
-  disableRefreshing: false,
-  
-  // Layout type
-  layoutType: 'default' | 'draggable' | 'shopify',
-  
-  // For draggable views
-  numColumns: 1,
-  onReorder: (data) => console.log('Reordered:', data),
-  
-  // For paginated content
-  itemForPage: 20,
-  onEndReached: () => {
-    // Load more items
-  },
-  
-  // Custom styles
-  containerStyle: {
-    backgroundColor: '#f5f5f5'
-  }
-};
-```
-
-## API Reference
-
-### Types
-
-#### PageProps
-```tsx
-interface PageProps<F extends FieldValues, Q extends QueriesArray> {
-  id: string;
-  ns?: string;
-  contents?: ContentItem<F, Q>[];
-  queries?: QueryConfigArray<Q>;
-  form?: FormManagerConfig<F>;
-  viewSettings?: ViewSettings;
-  meta?: PageMetadataProps;
-  enableAuthControl?: boolean;
-  onValuesChange?: (values: F) => void;
-}
-```
-
-#### ViewSettings
-```tsx
-interface ViewSettings {
-  disableRefreshing?: boolean;
-  layoutType?: 'default' | 'draggable' | 'shopify';
-  numColumns?: number;
-  onReorder?: (data: any[]) => void;
-  itemForPage?: number;
-  onEndReached?: () => void;
-  containerStyle?: ViewStyle;
-  header?: {
-    withoutPadding?: boolean;
-  };
-  footer?: {
-    withoutPadding?: boolean;
-  };
-}
-```
-
-#### ContentItem
-```tsx
-interface ContentItem<F extends FieldValues, Q extends QueriesArray> {
-  type: 'text' | 'input' | 'button' | 'list' | 'custom' | 'submit';
-  name?: string; // For form fields
-  config?: any; // Component-specific configuration
-  hidden?: boolean;
-  conditional?: (data: F, queries: Q) => boolean;
-}
-```
-
-## Examples
-
-### Complete Example: User Profile Page
-
-```tsx
-import React from 'react';
-import { PageGenerator, setReactNativePageConfig } from '@gaddario98/react-native-pages';
-
-// Configure the library
-setReactNativePageConfig({
-  authPageImage: require('./assets/logo.png'),
+const authPage = useAuthPageProps({
+	login: { text: 'login', onPress: () => router.push('/login') },
+	signup: { text: 'createAccount', variant: 'outlined' },
 });
 
-const UserProfilePage = () => {
-  return (
-    <PageGenerator
-      id="user-profile"
-      ns="profile"
-      queries={[
-        {
-          queryKey: ['user-profile'],
-          queryFn: () => fetch('/api/user/profile').then(res => res.json()),
-        }
-      ]}
-      form={{
-        defaultValues: {
-          firstName: '',
-          lastName: '',
-          email: '',
-          bio: ''
-        }
-      }}
-      contents={[
-        {
-          type: 'custom',
-          component: (
-            <Image 
-              source={{ uri: 'https://example.com/avatar.jpg' }}
-              style={{ width: 100, height: 100, borderRadius: 50 }}
-            />
-          )
-        },
-        {
-          type: 'input',
-          name: 'firstName',
-          config: {
-            label: 'First Name',
-            placeholder: 'Enter first name'
-          }
-        },
-        {
-          type: 'input',
-          name: 'lastName',
-          config: {
-            label: 'Last Name',
-            placeholder: 'Enter last name'
-          }
-        },
-        {
-          type: 'input',
-          name: 'email',
-          config: {
-            label: 'Email',
-            placeholder: 'Enter email',
-            keyboardType: 'email-address'
-          }
-        },
-        {
-          type: 'input',
-          name: 'bio',
-          config: {
-            label: 'Bio',
-            placeholder: 'Tell us about yourself',
-            multiline: true,
-            numberOfLines: 4
-          }
-        },
-        {
-          type: 'submit',
-          config: {
-            title: 'Save Profile',
-            onSubmit: (data) => {
-              console.log('Saving profile:', data);
-              // Handle profile save
-            }
-          }
-        }
-      ]}
-      viewSettings={{
-        disableRefreshing: false
-      }}
-      meta={{
-        title: 'User Profile',
-        description: 'Manage your profile information'
-      }}
-    />
-  );
-};
-
-export default UserProfilePage;
+setReactNativePageConfig({ authPageProps: authPage });
 ```
 
-## Dependencies
+## Relationship with `@gaddario98/react-pages`
 
-This library depends on several other packages in the @gaddario98 ecosystem:
+This package re-exports the underlying page engine so mixed React / React Native apps can share the same schema:
 
-- `@gaddario98/react-pages` - Core page generation logic
-- `@gaddario98/react-native-ui` - UI components for React Native
-- `@gaddario98/react-form` - Form management utilities
-- `@gaddario98/react-queries` - Query management utilities
-- `@gaddario98/utiles` - Common utilities
+- `PageGenerator`, `PageProps`, `ContentItem`, `ViewSettings`, `usePageConfig`, `useGenerateContent`, etc.
+- Form helpers (`useFormPage`, `useFormData`, `useGenerateContentRender`) and query utilities.
+- Global configuration (`pageConfig`, `setPageConfig`) to customize auth control, meta tags, and container components.
 
-External dependencies:
-- `@tanstack/react-query` - Data fetching and caching
-- `react-hook-form` - Form state management
-- `react-i18next` - Internationalization
-- `react-native-draggable-flatlist` - Drag and drop functionality
-- `@shopify/flash-list` - High-performance lists
+Keep defining pages as data (queries, forms, dynamic content factories) once—then pick the appropriate layout container for the platform.
 
-## Contributing
+## How `biblion-expo-version` uses it
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+- `core/config/index.tsx` calls `setReactNativeConfig` from `@gaddario98/react-native-core`, which forwards the `pages` object to `setReactNativePageConfig`. The app overrides:
+	- `authPageImage` and `pageConfig.isLogged` to handle verified accounts.
+	- `ItemsContainer` and `PageContainer` to inject custom `View` wrappers.
+	- Global auth page copy by composing `useAuthPageProps`.
+- `features/page/custom-layout-component/index.tsx` exports `CustomLayoutComponent` and `CustomDraggableLayout` that wrap `ShopifyView` and `DraggableView`, allowing screens to switch between virtualized grids and drag-and-drop layouts through `viewSettings.customLayoutComponent`.
+- `core/pages/PageGeneratorWithHeader.tsx` composes additional header content before delegating to the shared `PageGenerator`, illustrating how content arrays can be extended while preserving indices and drag settings.
+- Individual feature pages (for example `features/page/shared/post.tsx`) continue to describe their content, queries, and mutations with the shared DSL; the React Native layouts handle rendering and interactions.
+
+This setup lets the Expo app reuse business logic from `@gaddario98/react-pages` while adopting native-safe UI wrappers.
+
+## API surface
+
+| Export | Description |
+| --- | --- |
+| `setReactNativePageConfig(config: Partial<PageConfigProps>)` | Merge React Native-ready defaults into the shared `pageConfig`. |
+| `DefaultView`, `ShopifyView`, `DraggableView` | Drop-in replacements for `pageConfig.BodyContainer` tuned for RN. |
+| `useAuthPageProps(props: UseAuthPageProps)` | Generates translated auth page content. |
+| `*` (from `@gaddario98/react-pages`) | Re-export of every component, hook, type, and utility from the base package. |
+
+## Building the package
+
+```bash
+yarn build
+```
+
+This runs the Rollup bundle defined in `rollup.config.js` and emits ESM + type definitions to `dist/`.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.txt](LICENSE.txt) file for details.
-
-## Author
-
-**Giosuè Addario**
-
-- GitHub: [@gaddario98](https://github.com/gaddario98)
-- NPM: [@gaddario98](https://www.npmjs.com/~gaddario98)
-
-## Support
-
-If you encounter any issues or have questions, please [open an issue](https://github.com/gaddario98/react-native-pages/issues) on GitHub.
+MIT © Giosuè Addario
