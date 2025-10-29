@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback, ReactNode } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { RefreshControl, ScrollView } from "react-native";
 import { withMemo } from "@gaddario98/utiles";
 import { FieldValues } from "react-hook-form";
@@ -7,7 +7,10 @@ import { QueriesArray } from "@gaddario98/react-queries";
 import { FormManagerConfig, Submit } from "@gaddario98/react-form";
 import { ContentItem, ViewSettings } from "@gaddario98/react-pages";
 
-interface CustomScrollViewProps<F extends FieldValues, Q extends QueriesArray> {
+export interface CustomScrollViewProps<
+  F extends FieldValues,
+  Q extends QueriesArray,
+> {
   viewSettings?: ViewSettings;
   allContents: (ContentItem<F, Q> | FormManagerConfig<F> | Submit<F>)[];
   children: React.JSX.Element[];

@@ -11,11 +11,10 @@ export interface UseAuthPageProps {
 }
 
 export const useAuthPageProps = (props: UseAuthPageProps): PageProps => {
-
   const authPageProps = useMemo(
     (): PageProps => ({
       ns: "auth",
-      id: "Control",
+      id: "auth",
       contents: [
         {
           type: "custom",
@@ -64,7 +63,7 @@ export const useAuthPageProps = (props: UseAuthPageProps): PageProps => {
             <Button
               {...props.login}
               text={props.login?.text ?? "login"}
-              ns="auth"
+              ns={props.login?.ns ?? "auth"}
               variant={props.login?.variant ?? "contained"}
             />
           ),
@@ -76,7 +75,7 @@ export const useAuthPageProps = (props: UseAuthPageProps): PageProps => {
             <Button
               {...props.signup}
               text={props.signup?.text ?? "createAccount"}
-              ns="auth"
+              ns={props.signup?.ns ?? "auth"}
               variant={props.signup?.variant ?? "outlined"}
               color={props.signup?.color ?? "secondary"}
             />
@@ -89,7 +88,7 @@ export const useAuthPageProps = (props: UseAuthPageProps): PageProps => {
             <Button
               {...props.reportProblem}
               text={props.reportProblem?.text ?? "reportProblem"}
-              ns="settings"
+              ns={props.reportProblem?.ns ?? "buttons"}
               variant={props.reportProblem?.variant ?? "text"}
               color={props.reportProblem?.color ?? "error"}
             />

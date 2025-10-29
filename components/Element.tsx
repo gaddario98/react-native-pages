@@ -1,11 +1,11 @@
-import { contentLayout, padding } from "@gaddario98/react-native-ui";
+import { contentLayout } from "@gaddario98/react-native-ui";
 import { ViewSettings } from "@gaddario98/react-pages";
 import { memo } from "react";
 import { View, ViewStyle } from "react-native";
 
 const Element = ({
   style,
-  children
+  children,
 }: {
   style?: ViewStyle;
   children: React.JSX.Element[];
@@ -13,15 +13,7 @@ const Element = ({
   if (!children?.length) return null;
 
   return (
-    <View
-      style={[
-        contentLayout,
-        {  height: "auto" },
-        style,
-      ]}
-    >
-      {children}
-    </View>
+    <View style={[contentLayout, { height: "auto" }, style]}>{children}</View>
   );
 };
 

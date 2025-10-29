@@ -1,7 +1,6 @@
 import { setPageConfig, PageConfigProps } from "@gaddario98/react-pages";
 import Element from "./components/Element";
 import { View } from "react-native";
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Alert, contentLayout, padding } from "@gaddario98/react-native-ui";
 import { DefaultView } from "./components/layout";
 import React from "react";
@@ -69,10 +68,9 @@ export const setReactNativePageConfig = (config: Partial<PageConfigProps>) => {
         />
       ),
     PageContainer: ({ children, id }) => (
-      <SafeAreaView style={{ flex: 1 }} id={id} key={id}>
-        
+      <View style={{ flex: 1 }} id={id} key={id}>
         {children as React.JSX.Element}
-      </SafeAreaView>
+      </View>
     ),
     ...config,
   });

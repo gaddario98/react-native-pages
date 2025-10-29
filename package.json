@@ -1,6 +1,6 @@
 {
   "name": "@gaddario98/react-native-pages",
-  "version": "1.0.17",
+  "version": "1.0.19",
   "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -33,9 +33,9 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@gaddario98/react-form": "^1.0.20",
+    "@gaddario98/react-form": "^1.0.21",
     "@gaddario98/react-native-ui": "^1.0.25",
-    "@gaddario98/react-pages": "^1.0.21",
+    "@gaddario98/react-pages": "^1.0.23",
     "@gaddario98/react-queries": "^1.0.21",
     "@gaddario98/utiles": "^1.0.15"
   },
