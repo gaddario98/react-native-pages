@@ -1,0 +1,18 @@
+spec
+
+Questo plugin fa da tramite tra @gaddario98/react-pages e le app react native. Deve ottimizzare e configurare il plugin base per un uso in app react native expo.
+
+plan
+
+Aggiorna la versione di @gaddario98/react-pages alla 2.
+Analizza direattamente il plugin che si torva in questa cartella: /Users/gaddario98/Documents/projects-workspace/packages/react-base-pages
+
+constituation
+
+Questo plugin usa react, react native erollup per creare un collegamento tra il plugin base e le applicazioni react native.
+
+
+
+
+
+
