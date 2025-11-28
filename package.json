@@ -1,6 +1,6 @@
 {
   "name": "@gaddario98/react-native-pages",
-  "version": "1.0.25",
+  "version": "1.0.26",
   "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
